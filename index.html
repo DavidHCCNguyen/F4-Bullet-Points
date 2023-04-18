@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bullet Point Maker</title>
+    <script src="bullet-point-maker.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <h1>Bullet Point Maker</h1>
+    <textarea id="input-text"></textarea>
+    <button onclick="addBulletPoint()">Save as Bullet Point</button>
+    <ul id="bullet-points"></ul>
+  </body>
+  <script>
+    function addBulletPoint() {
+      const inputText = document.getElementById("input-text");
+      const bulletPoints = document.getElementById("bullet-points");
+
+      // Create new list item element and add input text to it
+      const newListItem = document.createElement("li");
+      const timestamp = new Date().toLocaleString();
+      newListItem.innerHTML = `${inputText.value}<button onclick="deleteBulletPoint(this)">Delete</button><br><span style="font-size: small; color: gray">${timestamp}</span>`;
+
+      // Add new list item to bullet points list
+      bulletPoints.appendChild(newListItem);
+
+      // Save bullet points to localStorage
+      const bulletPointsArray = JSON.parse(localStorage.getItem("bulletPoints")) || [];
+      const newBulletPoint = { text: inputText.value, timestamp: timestamp };
+      bulletPointsArray.push(newBulletPoint);
+      localStorage.setItem("bulletPoints", JSON.stringify(bulletPointsArray));
+
+      // Clear input text
+      inputText.value = "";
+    }
+
+    function deleteBulletPoint(button) {
+      const listItem = button.parentNode;
+      const bulletPoints = document.getElementById("bullet-points");
+
+      // Remove list item from bullet points list
+      bulletPoints.removeChild(listItem);
+
+      // Remove bullet point from localStorage
+      const bulletPointsArray = JSON.parse(localStorage.getItem("bulletPoints")) || [];
+      const listItemText = listItem.childNodes[0].nodeValue;
+      const bulletPointIndex = bulletPointsArray.findIndex(function(bulletPoint) {
+        return bulletPoint.text === listItemText;
+      });
+      bulletPointsArray.splice(bulletPointIndex, 1);
+      localStorage.setItem("bulletPoints", JSON.stringify(bulletPointsArray));
+    }
+
+    // Load saved bullet points from localStorage on page load
+    window.onload = function() {
+      const bulletPointsArray = JSON.parse(localStorage.getItem("bulletPoints")) || [];
+      const bulletPoints = document.getElementById("bullet-points");
+
+      bulletPointsArray.forEach(function(bulletPoint) {
+        const newListItem = document.createElement("li");
+        newListItem.innerHTML = `${bulletPoint.text}<button onclick="deleteBulletPoint(this)">Delete</button><br><span style="font-size: small; color: gray">${bulletPoint.timestamp}</span>`;
+        bulletPoints.appendChild(newListItem);
+      });
+    };
+  </script>
+</html>
